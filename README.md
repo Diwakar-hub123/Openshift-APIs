@@ -101,3 +101,157 @@ POST|/apis/batch/v1/namespaces/{{namespace}}/jobs|create_jobs|POST/apis/apps/v1/
 POST|/apis/apps/v1/namespaces/{{namespace}}/replicasets|create_replicaSets
 POST|/api/v1/namespaces/{{namespace}}/replicationcontrollers|create_ReplicationControllers
 POST|/apis/autoscaling/v2beta2/namespaces/{{namespace}}/horizontalpodautoscalers|create_HorizontalPodAutoScalers
+
+
+# **Create Namespace**
+
+Create Namespace.
+
+### Example 
+```
+{
+  "metadata": 
+    {
+    "name": "test123", 
+    "labels": 
+        {
+        "app": "frontend"
+        }
+    }
+}
+```
+### Mandatory fields
+```
+apiVersion : v1
+kind : String 
+metadata :
+    name : String 
+    labels: key-value pair
+```
+### Documentation Link
+"https://docs.openshift.com/container-platform/4.12/rest_api/metadata_apis/namespace-v1.html#namespace-v1"
+
+# **Create Virtual_Machine **
+
+Create Virtual_Machine
+
+### Example 
+```
+{
+    "apiVersion": "kubevirt.io/v1",
+    "kind": "VirtualMachine",
+    "metadata": {
+        "name": "testingvm1",
+        "labels": {
+            "app": "testingvm",
+            "os.template.kubevirt.io/fedora36": "true"
+        },
+        "namespace": "default"
+    },
+    "spec": {
+        "running": false,
+        "template": {
+            "spec": {
+                "domain": {
+                    "cpu": {
+                        "cores": 1,
+                        "sockets": 1,
+                        "threads": 1
+                    },
+                    "devices": {
+                        "disks": [
+                            {
+                                "disk": {
+                                    "bus": "virtio"
+                                },
+                                "name": "rootdisk"
+                            }
+                        ],
+                        "interfaces": [
+                            {
+                                "masquerade": {},
+                                "model": "virtio",
+                                "name": "default"
+                            }
+                        ],
+                        "networkInterfaceMultiqueue": true,
+                        "rng": {}
+                    }
+                },
+                "hostname": "example",
+                "networks": [
+                    {
+                        "name": "default",
+                        "pod": {}
+                    }
+                ],
+                "terminationGracePeriodSeconds": 180,
+                "volumes": [
+                    {
+                        "name": "rootdisk",
+                        "containerDisk": {
+                            "image": "quay.io/containerdisks/fedora:36"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+```
+
+### Mandatory fields
+```
++ apiVersion : kubevirt.io/v1 
++ kind : String 
++ metadata :
+   + name : String
+   + namespace: String
+   + labels: Key-value pairs 
++ spec:
+    + running:boolean
+    + template:
+        +spec:
+          +cpu
+              +cores
+          +domain
+              +devices
+                 +disks
+          +domain
+              +resources
+                 +requests
+                    +memory
+          +terminationGracePeriodSeconds
+          +networks
+          +volumes
+```
+### Documentation Link
+"https://docs.openshift.com/container-platform/4.12/virt/virtual_machines/virt-create-vms.html#virt-creating-vm-custom-template_virt-create-vms"
+
+# **Create Namespace**
+
+Create Namespace.
+
+### Example 
+```
+{
+  "metadata": 
+    {
+    "name": "test123", 
+    "labels": 
+        {
+        "app": "frontend"
+        }
+    }
+}
+```
+### Mandatory fields
+```
+apiVersion : v1
+kind : String 
+metadata :
+    name : String 
+    labels: key-value pair
+```
+### Documentation Link
+"https://docs.openshift.com/container-platform/4.12/rest_api/metadata_apis/namespace-v1.html#namespace-v1"
