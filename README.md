@@ -131,67 +131,518 @@ metadata :
 ### Documentation Link
 "https://docs.openshift.com/container-platform/4.12/rest_api/metadata_apis/namespace-v1.html#namespace-v1"
 
-# **Create Virtual_Machine **
+# **Create_Persistent_volume**
 
-Create Virtual_Machine
+Create_Persistent_volume.
 
 ### Example 
 ```
 {
-    "apiVersion": "kubevirt.io/v1",
-    "kind": "VirtualMachine",
+    "apiVersion": "v1",
+    "kind": "PersistentVolume",
     "metadata": {
-        "name": "testingvm1",
+        "name": "pv12"
+    },
+    "spec": {
+        "capacity": {
+            "storage": "5Gi"
+        },
+        "accessModes": [
+            "ReadWriteOnce"
+        ],
+        "persistentVolumeReclaimPolicy": "Retain",
+        "storageClassName": "slow",
+        "nfs": {
+            "path": "/tmp",
+            "server": "172.17.0.2"
+        }
+    }
+}
+```
+# **Create_Storage_Class**
+
+Create Storage Class.
+
+### Example 
+```
+{
+    "metadata": {
+        "name": "example",
+        "annotations": {
+            "description": "example"
+        }
+    },
+    "provisioner": "kubernetes.io/no-provisioner",
+    "parameters": {
+        "test": "test"
+    },
+    "volumeBindingMode": "WaitForFirstConsumer"
+}
+```
+# **Create_Volume_Snapshot**
+
+Create Volume Snapshot.
+
+### Example 
+```
+{
+    "apiVersion": "snapshot.storage.k8s.io/v1",
+    "kind": "VolumeSnapshot",
+    "metadata": {
+        "name": "vs12",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "volumeSnapshotClassName": "vs12class",
+        "source": {
+            "persistentVolumeClaimName": "pv-12"
+        }
+    }
+}
+```
+# **Create VolumeSnapshotClass**
+
+Create VolumeSnapshotClass.
+
+### Example 
+```
+{
+    "apiVersion": "snapshot.storage.k8s.io/v1",
+    "kind": "VolumeSnapshotClass",
+    "metadata": {
+        "name": "test-snapclass"
+    },
+    "driver": "hostpath.csi.k8s.io",
+    "deletionPolicy": "Delete"
+}
+```
+# **Create VolumeSnapshotContent**
+
+Create VolumeSnapshotContent.
+
+### Example 
+```
+{
+    "apiVersion": "snapshot.storage.k8s.io/v1",
+    "kind": "VolumeSnapshotContent",
+    "metadata": {
+        "name": "test-snap"
+    },
+    "spec": {
+        "deletionPolicy": "Delete",
+        "driver": "hostpath.csi.k8s.io",
+        "source": {
+            "snapshotHandle": "7bdd0de3-aaeb-11e8-9aae-0242ac110002"
+        },
+        "volumeSnapshotClassName": "example-snapclass",
+        "volumeSnapshotRef": {
+            "name": "example-snap",
+            "namespace": "default"
+        }
+    }
+}
+```
+# **Create PersistentVolumeClaim**
+
+Create PersistentVolumeClaim.
+
+### Example 
+```
+{
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+        "name": "example",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "accessModes": [
+            "ReadWriteOnce"
+        ],
+        "volumeMode": "Filesystem",
+        "resources": {
+            "requests": {
+                "storage": "1Gi"
+            }
+        },
+        "selector": {
+            "matchLabels": {
+                "name": "example"
+            }
+        },
+        "storageClassName": "localblock-sc"
+    }
+}
+```
+# **Create Pod**
+
+Create Pod.
+
+### Example 
+```
+{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+        "name": "test0221",
         "labels": {
-            "app": "testingvm",
-            "os.template.kubevirt.io/fedora36": "true"
+            "app": "httpd"
         },
         "namespace": "default"
     },
     "spec": {
-        "running": false,
-        "template": {
-            "spec": {
-                "domain": {
-                    "cpu": {
-                        "cores": 1,
-                        "sockets": 1,
-                        "threads": 1
-                    },
-                    "devices": {
-                        "disks": [
-                            {
-                                "disk": {
-                                    "bus": "virtio"
-                                },
-                                "name": "rootdisk"
-                            }
-                        ],
-                        "interfaces": [
-                            {
-                                "masquerade": {},
-                                "model": "virtio",
-                                "name": "default"
-                            }
-                        ],
-                        "networkInterfaceMultiqueue": true,
-                        "rng": {}
+        "containers": [
+            {
+                "name": "httpd",
+                "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                "ports": [
+                    {
+                        "containerPort": 8080
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+# **Create Deployment**
+
+Create Deployment.
+
+### Example 
+```
+    {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+            "namespace": "default",
+            "name": "deploy1234",
+            "annotations": {}
+        },
+        "spec": {
+            "selector": {
+                "matchLabels": {
+                    "app": "name"
+                }
+            },
+            "replicas": 3,
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "app": "name"
                     }
                 },
-                "hostname": "example",
-                "networks": [
+                "spec": {
+                    "containers": [
+                        {
+                            "name": "container",
+                            "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                            "ports": [
+                                {
+                                    "containerPort": 8080,
+                                    "protocol": "TCP"
+                                }
+                            ],
+                            "env": []
+                        }
+                    ],
+                    "imagePullSecrets": []
+                }
+            },
+            "paused": false
+        }
+    }
+```
+# **Create DeploymentConfig**
+
+Create DeploymentConfig.
+
+### Example 
+```
+{
+    "apiVersion": "apps.openshift.io/v1",
+    "kind": "DeploymentConfig",
+    "metadata": {
+        "namespace": "default",
+        "name": "mydeploy12"
+    },
+    "spec": {
+        "selector": {
+            "app": "mydeploy1"
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "mydeploy1"
+                }
+            },
+            "spec": {
+                "containers": [
                     {
-                        "name": "default",
-                        "pod": {}
+                        "name": "container",
+                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "env": [
+                            {
+                                "name": "test",
+                                "value": "test"
+                            }
+                        ]
                     }
                 ],
-                "terminationGracePeriodSeconds": 180,
-                "volumes": [
+                "imagePullSecrets": []
+            }
+        },
+        "strategy": {
+            "type": "Rolling",
+            "rollingParams": {
+                "timeoutSeconds": 600,
+                "updatePeriodSeconds": 1,
+                "intervalSeconds": 1,
+                "pre": {
+                    "failurePolicy": "Abort",
+                    "execNewPod": {
+                        "containerName": "container",
+                        "command": [
+                            "hostname"
+                        ]
+                    }
+                },
+                "maxSurge": "25%",
+                "maxUnavailable": "25%"
+            }
+        },
+        "paused": false
+    }
+}
+```
+# **Create StatefulSet**
+
+Create StatefulSet.
+
+### Example 
+```
+{
+    "apiVersion": "apps/v1",
+    "kind": "StatefulSet",
+    "metadata": {
+        "name": "test-ss1",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "serviceName": "nginx",
+        "replicas": 3,
+        "selector": {
+            "matchLabels": {
+                "app": "nginx"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "nginx"
+                }
+            },
+            "spec": {
+                "terminationGracePeriodSeconds": 10,
+                "containers": [
                     {
-                        "name": "rootdisk",
-                        "containerDisk": {
-                            "image": "quay.io/containerdisks/fedora:36"
+                        "name": "nginx",
+                        "image": "gcr.io/google_containers/nginx-slim:0.8",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "name": "web"
+                            }
+                        ],
+                        "volumeMounts": [
+                            {
+                                "name": "www",
+                                "mountPath": "/usr/share/nginx/html"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "volumeClaimTemplates": [
+            {
+                "metadata": {
+                    "name": "www"
+                },
+                "spec": {
+                    "accessModes": [
+                        "ReadWriteOnce"
+                    ],
+                    "storageClassName": "my-storage-class",
+                    "resources": {
+                        "requests": {
+                            "storage": "1Gi"
                         }
+                    }
+                }
+            }
+        ]
+    }
+}
+```
+# **Create Secret**
+
+Create Secret.
+
+### Example 
+```
+{
+    "metadata": {
+        "namespace": "{{namespace}}",
+        "name": "aws-secret1"
+    },
+    "apiVersion": "v1",
+    "data": {
+        "apikey": "dGhpcyBpcyB0ZXN0IHBhc3N3b3Jk"
+    },
+    "kind": "Secret",
+    "type": "Opaque"
+}
+```
+# **Create ConfigMap**
+
+Create ConfigMap.
+
+### Example 
+```
+{
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+        "name": "mymap-123",
+        "namespace": "{{namespace}}"
+    },
+    "data": {
+        "secret": "hello i am good"
+    },
+    "binaryData": {
+        "test": "ello"
+    },
+    "immutable": false
+}
+```
+# **Create CronJob**
+
+Create CronJob.
+
+### Example 
+```
+{
+    "apiVersion": "batch/v1",
+    "kind": "CronJob",
+    "metadata": {
+        "name": "cron02",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "schedule": "@daily",
+        "jobTemplate": {
+            "spec": {
+                "template": {
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "hello",
+                                "image": "busybox",
+                                "args": [
+                                    "/bin/sh",
+                                    "-c",
+                                    "date; echo Hello from the Kubernetes cluster"
+                                ]
+                            }
+                        ],
+                        "restartPolicy": "OnFailure"
+                    }
+                }
+            }
+        }
+    }
+}
+```
+# **Create Job**
+
+Create Job.
+
+### Example 
+```
+{
+    "apiVersion": "batch/v1",
+    "kind": "Job",
+    "metadata": {
+        "name": "job02",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "selector": {},
+        "template": {
+            "metadata": {
+                "name": "pi"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "pi",
+                        "image": "perl",
+                        "command": [
+                            "perl",
+                            "-Mbignum=bpi",
+                            "-wle",
+                            "print bpi(2000)"
+                        ]
+                    }
+                ],
+                "restartPolicy": "Never"
+            }
+        }
+    }
+}
+```
+# **Create DaemonSet**
+
+Create DaemonSet.
+
+### Example 
+```
+{
+    "apiVersion": "apps/v1",
+    "kind": "DaemonSet",
+    "metadata": {
+        "name": "daemon123",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "selector": {
+            "matchLabels": {
+                "app": "httpd"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "httpd"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "httpd",
+                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                        "ports": [
+                            {
+                                "containerPort": 8080
+                            }
+                        ]
                     }
                 ]
             }
@@ -199,59 +650,253 @@ Create Virtual_Machine
     }
 }
 ```
+# **Create ReplicaSet**
 
-### Mandatory fields
-```
-+ apiVersion : kubevirt.io/v1 
-+ kind : String 
-+ metadata :
-   + name : String
-   + namespace: String
-   + labels: Key-value pairs 
-+ spec:
-    + running:boolean
-    + template:
-        +spec:
-          +cpu
-              +cores
-          +domain
-              +devices
-                 +disks
-          +domain
-              +resources
-                 +requests
-                    +memory
-          +terminationGracePeriodSeconds
-          +networks
-          +volumes
-```
-### Documentation Link
-"https://docs.openshift.com/container-platform/4.12/virt/virtual_machines/virt-create-vms.html#virt-creating-vm-custom-template_virt-create-vms"
-
-# **Create Namespace**
-
-Create Namespace.
+Create ReplicaSet.
 
 ### Example 
 ```
 {
-  "metadata": 
-    {
-    "name": "test123", 
-    "labels": 
-        {
-        "app": "frontend"
+    "apiVersion": "apps/v1",
+    "kind": "ReplicaSet",
+    "metadata": {
+        "name": "replica12",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "selector": {
+            "matchLabels": {
+                "app": "httpd"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "httpd"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "httpd",
+                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                        "ports": [
+                            {
+                                "containerPort": 8080
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     }
 }
 ```
-### Mandatory fields
+# **Create ReplicationController**
+
+Create ReplicationController.
+
+### Example 
 ```
-apiVersion : v1
-kind : String 
-metadata :
-    name : String 
-    labels: key-value pair
+{
+    "apiVersion": "v1",
+    "kind": "ReplicationController",
+    "metadata": {
+        "name": "replica12",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "replicas": 2,
+        "selector": {
+            "app": "httpd"
+        },
+        "template": {
+            "metadata": {
+                "name": "httpd",
+                "labels": {
+                    "app": "httpd"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "httpd",
+                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest",
+                        "ports": [
+                            {
+                                "containerPort": 8080
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
 ```
-### Documentation Link
-"https://docs.openshift.com/container-platform/4.12/rest_api/metadata_apis/namespace-v1.html#namespace-v1"
+# **Create HorizontalPodAutoscaler**
+
+Create HorizontalPodAutoscaler.
+
+### Example 
+```
+{
+    "apiVersion": "autoscaling/v2beta2",
+    "kind": "HorizontalPodAutoscaler",
+    "metadata": {
+        "name": "hpa123",
+        "namespace": "{{namespace}}"
+    },
+    "spec": {
+        "scaleTargetRef": {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "name": "example"
+        },
+        "minReplicas": 1,
+        "maxReplicas": 3,
+        "metrics": [
+            {
+                "type": "Resource",
+                "resource": {
+                    "name": "cpu",
+                    "target": {
+                        "averageUtilization": 50,
+                        "type": "Utilization"
+                    }
+                }
+            }
+        ]
+    }
+}
+```
+# **Create Service**
+
+Create Service.
+
+### Example 
+```
+{
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+        "name": "service12",
+        "namespace": "default"
+    },
+    "spec": {
+        "selector": {
+            "app": "MyApp"
+        },
+        "ports": [
+            {
+                "protocol": "TCP",
+                "port": 80,
+                "targetPort": 9376
+            }
+        ]
+    }
+}
+```
+# **Create Ingress**
+
+Create Ingress.
+
+### Example 
+```
+{
+    "apiVersion": "networking.k8s.io/v1",
+    "kind": "Ingress",
+    "metadata": {
+        "name": "ingress12",
+        "namespace": "default"
+    },
+    "spec": {
+        "rules": [
+            {
+                "http": {
+                    "paths": [
+                        {
+                            "path": "/testpath",
+                            "pathType": "Prefix",
+                            "backend": {
+                                "service": {
+                                    "name": "test",
+                                    "port": {
+                                        "number": 80
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+```
+# **Create NetworkPolicy**
+
+Create NetworkPolicy.
+
+### Example 
+```
+{
+    "kind": "NetworkPolicy",
+    "apiVersion": "networking.k8s.io/v1",
+    "metadata": {
+        "name": "np-123",
+        "namespace": "default"
+    },
+    "spec": {
+        "podSelector": {}
+    }
+}
+```
+# **Create NetworkAttachmentDefinition**
+
+Create NetworkAttachmentDefinition.
+
+### Example 
+```
+{
+    "apiVersion": "k8s.cni.cncf.io/v1",
+    "kind": "NetworkAttachmentDefinition",
+    "metadata": {
+        "name": "nad123",
+        "namespace": "default",
+        "annotations": {
+            "k8s.v1.cni.cncf.io/resourceName": "bridge.network.kubevirt.io/test",
+            "description": "nad12"
+        }
+    },
+    "spec": {
+        "config": "{\"name\":\"nad12\",\"type\":\"cnv-bridge\",\"cniVersion\":\"0.3.1\",\"bridge\":\"test\",\"macspoofchk\":true,\"ipam\":{}}"
+    }
+}
+```
+# **Create Route**
+
+Create Route.
+
+### Example 
+```
+{
+    "kind": "Route",
+    "apiVersion": "route.openshift.io/v1",
+    "metadata": {
+        "name": "route12",
+        "namespace": "default",
+        "labels": {}
+    },
+    "spec": {
+        "to": {
+            "kind": "Service",
+            "name": "route12"
+        },
+        "tls": {},
+        "port": {
+            "targetPort": 9376
+        }
+    }
+}
+```
